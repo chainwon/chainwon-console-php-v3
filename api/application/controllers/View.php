@@ -28,7 +28,7 @@ class View extends CI_Controller {
     }
 
     public function settingIndex() {
-        $this->db->where('uid',$this->Model->user->uid);
+        $this->db->where('uid',$this->Model->user['uid']);
         $query = $this->db->get('user');
         $result = $query->row_array();
         $result['countdown']['year'] = date('Y',$result['countdown_time']);
@@ -38,7 +38,7 @@ class View extends CI_Controller {
     }
 
     public function settingNavigation() {
-        $this->db->where('uid',$this->Model->user->uid);
+        $this->db->where('uid',$this->Model->user['uid']);
         $this->db->select('site_id,order');
         $this->db->order_by('site_id ASC');
         $query = $this->db->get('relationship');

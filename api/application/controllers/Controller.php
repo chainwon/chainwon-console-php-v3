@@ -9,94 +9,121 @@ class Controller extends CI_Controller {
         $this->load->database();
     }
 
-    public function cookie() {
+    public function saveSetting() {
         $a = array(
             'state' => 1,
+            'info' => '保存成功！',
         );
+
         $post = json_decode(file_get_contents("php://input"),true);
-        setcookie('qq', base64_encode($post['qq']), time()+60*60*24*365, '/');
+        $post = $post['form'];
+
+        $countdown_time=$post['countdown']['year'].'-'.$post['countdown']['month'].'-'.$post['countdown']['day'];
+        $post['countdown_time'] = strtotime($countdown_time);
+
+        if(!isset($post['appearad'])){
+            $post['appearad']=0;
+        }
+        if(!isset($post['unaudited'])){
+            $post['unaudited']=0;
+        }
+        if(!isset($post['ban'])){
+            $post['ban']=0;
+        }
+        if(!isset($post['debug'])){
+            $post['debug']=0;
+        }
+        if(!isset($post['newest'])){
+            $post['newest']=0;
+        }
+
+        if(isset($post['url'])) {
+            if(!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$post['url'])){
+                $a['state'] = 0;
+                $a['info'] = '你输入的 URL 不正确！请检查是否带上 http 或 https ！';
+                $this->Model->end($a);
+            }
+        }
+
+        $data = array(
+            'search' => $post['search'],
+            'countdown_name' => $post['countdown_name'],
+            'countdown_time' => strtotime($countdown_time),
+            'css' => $post['css'],
+            'ad' => $post['appearad'],
+            'unaudited' => $post['unaudited'],
+            'ban' => $post['ban'],
+            'url' => $post['url'],
+            'debug' => $post['debug'],
+            'newest' => $post['newest'],
+        );
+
+        $this->db->where('uid',$this->Model->user['uid']);
+        $this->db->update('user', $data);
+
         $this->Model->end($a);
     }
 
-    public function edit(){
+    public function addNavigation(){
         $a = array(
             'state' => 1,
-            'info' => '你的内容已经发布成功了，正带你回到首页。'
+            'info' => '添加成功！'
         );
 
         $post = json_decode(file_get_contents("php://input"),true);
 
-        if(!isset($this->Model->user)){
-            $a['state'] = 2;
+        if($this->Model->user['uid']==0){
+            $a['state'] = 0;
             $a['info'] = '你没有登录！';
             $this->Model->end($a);
         }
 
-        if(!isset($post['article'][0])){
+        if(!isset($post['site_id'])){
             $a['state'] = 0;
-            $a['info'] = '你没有编写任何内容，请添加你需要发布的内容！';
+            $a['info'] = '添加失败，网站ID为空！';
             $this->Model->end($a);
         }
 
-        $this->db->insert('message', array(
-            'cid' => $post['category'],
-            'anonymous' => $post['anonymous'],
-            'author' => $this->Model->user['qq'],
-            'article' => json_encode($post['article']),
-            'time' => time()
+        $this->db->where('uid',$this->Model->user['uid']);
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->from('relationship');
+        if($this->db->count_all_results() > 0){
+            $a['state'] = 0;
+            $a['info'] = '添加失败，您已经添加过该网站！';
+            $this->Model->end($a);
+        }
+
+        $this->db->insert('relationship', array(
+            'uid' => $this->Model->user['uid'],
+            'site_id' => $post['site_id'],
         ));
+
         $this->Model->end($a);
     }
 
-    public function reply() {
+    public function removeNavigation(){
         $a = array(
             'state' => 1,
-            'info' => '回复成功！'
+            'info' => '移除成功！'
         );
 
         $post = json_decode(file_get_contents("php://input"),true);
 
-        if(!isset($this->Model->user)){
+        if($this->Model->user['uid']==0){
             $a['state'] = 0;
             $a['info'] = '你没有登录！';
             $this->Model->end($a);
         }
 
-        if($post['text'] == NULL){
+        if(!isset($post['site_id'])){
             $a['state'] = 0;
-            $a['info'] = '你没有编写任何内容，请添加你需要发布的内容！';
+            $a['info'] = '移除失败，网站ID为空！';
             $this->Model->end($a);
         }
 
-        $this->db->insert('comment', array(
-            'mid' => $post['mid'],
-            'parent' => $post['coid'],
-            'author' => $this->Model->user['qq'],
-            'text' => $post['text'],
-            'time' => time()
-        ));
-
-        $coid = $this->db->insert_id();
-
-        if($post['coid']!==0){
-            $this->db->where('coid',$post['coid']);
-            $this->db->select('author');
-            $query = $this->db->get('comment');
-            $uid = $query->row_array();
-        }else{
-            $this->db->where('mid',$post['mid']);
-            $this->db->select('author');
-            $query = $this->db->get('message');
-            $uid = $query->row_array();
-        }
-
-        $this->db->insert('notice', array(
-            'type' => 'reply',
-            'mid' => $post['mid'],
-            'coid' => $coid,
-            'uid' => $uid['author'],
-            'time' => time()
-        ));
+        $this->db->where('uid',$this->Model->user['uid']);
+        $this->db->where('site_id', $post['site_id']);
+        $this->db->delete('relationship');
 
         $this->Model->end($a);
     }
@@ -118,11 +145,4 @@ class Controller extends CI_Controller {
 
     }
 
-    public function notice($readall=false) {
-        if(!$readall) {
-            $post = json_decode(file_get_contents("php://input"),true);
-
-            
-        }
-    }
 }

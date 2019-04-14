@@ -68,7 +68,7 @@ class View extends CI_Controller {
                 if($result[$x]['cover'] == NULL){
                     $result[$x]['cover'] = 'https://i.loli.net/2018/02/13/5a8302bdbadaa.jpg';
                 }
-                
+
                 $result[$x]['order'] = $order[$x]['order'];
                 $result[$x]['added'] = true;
                 $x += 1;
@@ -90,6 +90,18 @@ class View extends CI_Controller {
         
         $this->db->select('site_id,name,logo,intro,site,order,cover');
         $this->db->limit(32,($post['page']-1)*32);
+
+        if($this->Model->chainwon_user['ban']!=1){
+            $this->db->where('isdefault != ', 4);
+        }elseif($this->Model->chainwon_user['unaudited']!=1){
+            $this->db->where('isdefault != ', 2);
+        }
+        if($this->Model->chainwon_user['newest'] == 1){
+            $this->db->order_by('order DESC, site_id DESC');
+        }else{
+            $this->db->order_by('order DESC, site_id ASC');
+        }
+        
         $query = $this->db->get('website');
         $result = $query->result_array();
 

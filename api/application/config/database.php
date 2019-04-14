@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$active_group = 'account';
+$active_group = 'chainwon';
 $query_builder = TRUE;
 
-$db['account'] = array(
+$db['chainwon'] = array(
 	'dsn'	=> '',
 	'hostname' => '47.93.60.166',
 	'username' => 'chainwon',

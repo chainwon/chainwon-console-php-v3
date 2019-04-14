@@ -24,6 +24,12 @@ class Model extends CI_Model {
         curl_setopt($ch, CURLOPT_COOKIE, "username=$username;c=$c");
         $this->user=json_decode(trim(curl_exec($ch), chr(239) . chr(187) . chr(191)), true);
         curl_close($ch);
+
+        if($this->user['uid']!=0){
+            $this->db->where('uid = ', $this->user['uid']);
+            $query = $this->db->get('user');
+            $this->chainwon_user = $query->row_array();
+        }
     }
     
     public function get_client_ip (){

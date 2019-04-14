@@ -8,8 +8,14 @@ class Model extends CI_Model {
             'biao' => '*',
             'ip' => $this->get_client_ip (),
         );
-        $username = $_COOKIE['username'];
-        $c = $_COOKIE['c'];
+        $username = '';
+        $c = '';
+        if(isset($_COOKIE['username'])){
+            $username = $_COOKIE['username'];
+        }
+        if(isset($_COOKIE['c'])){
+            $c = $_COOKIE['c'];
+        }
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'https://account.mixcm.com/api/view/user');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -18,8 +18,7 @@ class Controller extends CI_Controller {
         $post = json_decode(file_get_contents("php://input"),true);
         $post = $post['form'];
 
-        $countdown_time=$post['countdown']['year'].'-'.$post['countdown']['month'].'-'.$post['countdown']['day'];
-        $post['countdown_time'] = strtotime($countdown_time);
+        $post['countdown_time'] = strtotime($countdown['time']);
 
         if(!isset($post['appearad'])){
             $post['appearad']=0;

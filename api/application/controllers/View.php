@@ -111,6 +111,12 @@ class View extends CI_Controller {
             if($result[$x]['cover'] == NULL){
                 $result[$x]['cover'] = 'https://i.loli.net/2018/02/13/5a8302bdbadaa.jpg';
             }
+            $this->db->where('uid',$this->Model->user['uid']);
+            $this->db->where('site_id',$result[$x]['site_id']);
+            $this->db->from('relationship');
+            if($this->db->count_all_results()>0){
+                $result[$x]['added'] = true;
+            }
             $x += 1;
         }
 

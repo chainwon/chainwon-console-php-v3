@@ -40,9 +40,7 @@ class View extends CI_Controller {
         $this->db->where('uid',$this->Model->user['uid']);
         $query = $this->db->get('user');
         $result = $query->row_array();
-        $result['countdown']['year'] = date('Y',$result['countdown_time']);
-        $result['countdown']['month'] = date('m',$result['countdown_time']);
-        $result['countdown']['day'] = date('d',$result['countdown_time']);
+        $result['countdown']['time'] = date('Y',$result['countdown_time']).'-'.date('m',$result['countdown_time']).'-'.date('d',$result['countdown_time']);
         $this->Model->end($result);
     }
 

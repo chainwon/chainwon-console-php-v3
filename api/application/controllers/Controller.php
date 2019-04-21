@@ -18,7 +18,7 @@ class Controller extends CI_Controller {
         $post = json_decode(file_get_contents("php://input"),true);
         $post = $post['form'];
 
-        $post['countdown_time'] = strtotime($countdown['time']);
+        $post['countdown_time'] = strtotime($post['countdown']['time']);
 
         if(!isset($post['appearad'])){
             $post['appearad']=0;
@@ -47,7 +47,7 @@ class Controller extends CI_Controller {
         $data = array(
             'search' => $post['search'],
             'countdown_name' => $post['countdown_name'],
-            'countdown_time' => strtotime($countdown_time),
+            'countdown_time' => $post['countdown_time'],
             'css' => $post['css'],
             'ad' => $post['appearad'],
             'unaudited' => $post['unaudited'],

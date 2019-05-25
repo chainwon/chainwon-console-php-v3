@@ -127,21 +127,111 @@ class Controller extends CI_Controller {
         $this->Model->end($a);
     }
 
-    public function picupload() {
-        $this->load->model('Sina');
+    public function uploadImage() {
+        $a = array(
+            'state' => 0,
+            'notice' => '请选择一张图片！',
+        );
+        if(isset($_FILES["image"])){
+            if((($_FILES["image"]["type"] == "image/png")
+                || ($_FILES["image"]["type"] == "image/jpeg")
+                || ($_FILES["image"]["type"] == "image/jpg"))
+                && ($_FILES["image"]["size"] < 200000)){
+                if ($_FILES["image"]["error"] > 0){
+                    $a['notice'] = $_FILES["image"]["error"];
+                }else{
+                    $a['notice'] = '2333';
+                    $info=getimagesize($_FILES["image"]["tmp_name"]);
+                    if($info[0] < 100 or $info[1] < 100){
+                        $a['notice'] = '请上传分辨率至少为100×100px的图片！';
+                        $this->Model->end($a);
+                    }elseif($info[0] != $info[1]){
+                        $a['notice'] = '请上传正方形图片！';
+                        $this->Model->end($a);
+                    }else{
+                        $name=time().'_'.$_FILES["image"]["name"];
+                        move_uploaded_file($_FILES["image"]["tmp_name"],FCPATH."upload/".$name);
+                        $a['state'] = 1;
+                        $this->load->helper('url');
+                        $a['notice'] = base_url('upload/'.$name);
+                    }
+                }
+            }else{
+                $a['notice'] = "请上传 .png 或.jpeg 或 .jpg 文件，并且图片大小不要超过200kb！";
+                $this->Model->end($a);
+            }
+        }
 
-        //准备本地图片文件
-        $saveFile = $_FILES["file"]["tmp_name"];
-        //要上传的文件本地路径
+        $this->Model->end($a);
 
-        //生成cookie
-        $cookie = $this->Sina->weiboLogin('17671245164',base64_decode('bHV6aWppYW4='));
+    }
 
-        //上传图片到微博图床
-        $data = $this->Sina->weiboUpload($saveFile,$cookie,$multipart = true) ;
+    public function newNavigation(){
+        
+        if(!isset($_POST['title'])){
+            show_404();
+        }
 
-        echo $this->Sina->getImageUrl(json_decode($data,true)['data']['pics']['pic_1']['pid']);
+        $a = array(
+            'state' => 1,
+            'notice' => '你的站点已被收录，如果可以请反个链！谢谢！',
+        );
 
+        $data = array(
+            'title' => '网站标题',
+            'site' => '网站链接',
+            'intro' => '网站介绍',
+            'logo' => '网站图标',
+        );
+
+        for ($x=0; $x<4; $x++) {
+            if($_POST[array_keys($data)[$x]]==''){
+                $a['state'] = 0;
+                $a['notice'] = $data[array_keys($data)[$x]].'不能为空！';
+                $this->Model->end($a);
+            }
+        }
+
+        if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$_POST['site'])) {
+            $a['state'] = 0;
+            $a['notice'] = '你输入的 URL 不正确！请检查是否带上 http 或 https ！';
+        }
+
+        
+        $site = parse_url($_POST['site'])['host'];
+        $this->db->like('site',$site);
+        $this->db->select('site,site_id');
+        $query = $this->db->get('website');
+        $rows = $query->result_array();
+        foreach($rows as $row){
+            if(parse_url($row['site'])['host'] == $site){
+                $a['state'] = 2;
+                $a['notice'] = '已收录了该网址，现在他已经自动添加到了你的网址导航中！';
+                $a['id'] = $row['site_id'];
+                $this->Model->end($a);
+            }
+        }
+    
+
+        
+        copy($_POST['logo'],FCPATH.'static/img/logo/'.md5(parse_url($_POST['site'])['host']).'.png');
+        $data = array(
+            'name' => $_POST['title'],
+            'intro' => $_POST['intro'],
+            'site' => $_POST['site'],
+            'logo' => md5(parse_url($_POST['site'])['host']),
+            'isdefault' => 0,
+            'uid' => $this->Model->user['uid'],
+        );
+        $this->db->insert('website', $data);
+        $this->db->where($data);
+        $this->db->select('site_id');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+        $a['id'] = $row['site_id'];
+    
+
+        $this->Model->end($a);
     }
 
 }

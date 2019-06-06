@@ -7,6 +7,7 @@ class Controller extends CI_Controller {
         header('Content-type: application/json');
         $this->load->model('Model');
         $this->load->database();
+        
     }
 
     public function saveSetting() {
@@ -132,16 +133,15 @@ class Controller extends CI_Controller {
             'state' => 0,
             'notice' => '请选择一张图片！',
         );
-        if(isset($_FILES["image"])){
-            if((($_FILES["image"]["type"] == "image/png")
-                || ($_FILES["image"]["type"] == "image/jpeg")
-                || ($_FILES["image"]["type"] == "image/jpg"))
-                && ($_FILES["image"]["size"] < 200000)){
-                if ($_FILES["image"]["error"] > 0){
-                    $a['notice'] = $_FILES["image"]["error"];
+        if(isset($_FILES["file"])){
+            if((($_FILES["file"]["type"] == "image/png")
+                || ($_FILES["file"]["type"] == "image/jpeg")
+                || ($_FILES["file"]["type"] == "image/jpg"))
+                && ($_FILES["file"]["size"] < 200000)){
+                if ($_FILES["file"]["error"] > 0){
+                    $a['notice'] = $_FILES["file"]["error"];
                 }else{
-                    $a['notice'] = '2333';
-                    $info=getimagesize($_FILES["image"]["tmp_name"]);
+                    $info=getimagesize($_FILES["file"]["tmp_name"]);
                     if($info[0] < 100 or $info[1] < 100){
                         $a['notice'] = '请上传分辨率至少为100×100px的图片！';
                         $this->Model->end($a);
@@ -149,11 +149,11 @@ class Controller extends CI_Controller {
                         $a['notice'] = '请上传正方形图片！';
                         $this->Model->end($a);
                     }else{
-                        $name=time().'_'.$_FILES["image"]["name"];
-                        move_uploaded_file($_FILES["image"]["tmp_name"],FCPATH."upload/".$name);
+                        $name=time().'.png';
+                        move_uploaded_file($_FILES["file"]["tmp_name"],$this->Model->root."upload/".$name);
                         $a['state'] = 1;
-                        $this->load->helper('url');
-                        $a['notice'] = base_url('upload/'.$name);
+                        $a['notice'] = '上传成功';
+                        $a['url'] = 'https://console.chainwon.com/upload/'.$name;
                     }
                 }
             }else{
@@ -168,9 +168,7 @@ class Controller extends CI_Controller {
 
     public function newNavigation(){
         
-        if(!isset($_POST['title'])){
-            show_404();
-        }
+        $post = json_decode(file_get_contents("php://input"),true);
 
         $a = array(
             'state' => 1,
@@ -185,20 +183,20 @@ class Controller extends CI_Controller {
         );
 
         for ($x=0; $x<4; $x++) {
-            if($_POST[array_keys($data)[$x]]==''){
+            if($post[array_keys($data)[$x]]==''){
                 $a['state'] = 0;
                 $a['notice'] = $data[array_keys($data)[$x]].'不能为空！';
                 $this->Model->end($a);
             }
         }
 
-        if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$_POST['site'])) {
+        if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$post['site'])) {
             $a['state'] = 0;
             $a['notice'] = '你输入的 URL 不正确！请检查是否带上 http 或 https ！';
         }
 
         
-        $site = parse_url($_POST['site'])['host'];
+        $site = parse_url($post['site'])['host'];
         $this->db->like('site',$site);
         $this->db->select('site,site_id');
         $query = $this->db->get('website');
@@ -214,12 +212,12 @@ class Controller extends CI_Controller {
     
 
         
-        copy($_POST['logo'],FCPATH.'static/img/logo/'.md5(parse_url($_POST['site'])['host']).'.png');
+        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
         $data = array(
-            'name' => $_POST['title'],
-            'intro' => $_POST['intro'],
-            'site' => $_POST['site'],
-            'logo' => md5(parse_url($_POST['site'])['host']),
+            'name' => $post['title'],
+            'intro' => $post['intro'],
+            'site' => $post['site'],
+            'logo' => md5(parse_url($post['site'])['host']),
             'isdefault' => 0,
             'uid' => $this->Model->user['uid'],
         );

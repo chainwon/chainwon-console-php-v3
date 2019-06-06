@@ -3,6 +3,9 @@
 class Model extends CI_Model {
 
     public function __construct(){
+        $this->root = str_replace("api\\","",FCPATH);
+        $this->root = str_replace("api/","",$this->root);
+        
         $this->load->database();
         $post_data = array (
             'biao' => '*',

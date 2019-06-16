@@ -193,6 +193,7 @@ class Controller extends CI_Controller {
         if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$post['site'])) {
             $a['state'] = 0;
             $a['notice'] = '你输入的 URL 不正确！请检查是否带上 http 或 https ！';
+            $this->Model->end($a);
         }
 
         

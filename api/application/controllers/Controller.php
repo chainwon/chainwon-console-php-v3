@@ -49,7 +49,6 @@ class Controller extends CI_Controller {
             'search' => $post['search'],
             'countdown_name' => $post['countdown_name'],
             'countdown_time' => $post['countdown_time'],
-            'css' => $post['css'],
             'ad' => $post['appearad'],
             'unaudited' => $post['unaudited'],
             'ban' => $post['ban'],
@@ -60,6 +59,42 @@ class Controller extends CI_Controller {
 
         $this->db->where('uid',$this->Model->user['uid']);
         $this->db->update('user', $data);
+
+        $this->Model->end($a);
+    }
+
+    public function changeTheme(){
+        $a = array(
+            'state' => 1,
+            'info' => '主题更换成功！'
+        );
+
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        if(!isset($post['tid'])){
+            $a['state'] = 0;
+            $a['info'] = '添加失败，主题ID为空！';
+            $this->Model->end($a);
+        }
+
+        $this->db->set('theme', $post['tid']);
+        $this->db->where('uid', $this->Model->user['uid']);
+        $this->db->update('user');
+
+        $this->Model->end($a);
+    }
+
+    public function saveCss(){
+        $a = array(
+            'state' => 1,
+            'info' => '保存成功！'
+        );
+
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $this->db->set('css', $post['css']);
+        $this->db->where('uid', $this->Model->user['uid']);
+        $this->db->update('user');
 
         $this->Model->end($a);
     }

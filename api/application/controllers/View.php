@@ -44,6 +44,27 @@ class View extends CI_Controller {
         $this->Model->end($result);
     }
 
+    public function settingStyle() {
+        $this->db->where('uid',$this->Model->user['uid']);
+        $this->db->select('css,theme');
+        $query = $this->db->get('user');
+        $user = $query->row_array();
+
+        if($user['theme']==0){
+            $user['theme']='1';
+        }
+        
+        $query = $this->db->get('theme');
+        $themes = $query->result_array();
+
+        $a = array(
+            'user' => $user,
+            'themes' => $themes 
+        );
+
+        $this->Model->end($a);
+    }
+
     public function settingNavigation() {
        
         $this->db->where('uid',$this->Model->user['uid']);

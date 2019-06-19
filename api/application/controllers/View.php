@@ -62,7 +62,7 @@ class View extends CI_Controller {
 
             $x = 0;
             while(isset($result[$x]['logo'])){
-                $result[$x]['logo'] = 'https://console.chainwon.com/static/img/logo/'.$result[$x]['logo'].'.png';
+                $result[$x]['logo'] = 'https://cdn.chainwon.com/img/logo/'.$result[$x]['logo'].'.png';
                 if($result[$x]['cover'] == NULL){
                     $result[$x]['cover'] = 'https://i.loli.net/2018/02/13/5a8302bdbadaa.jpg';
                 }
@@ -105,7 +105,7 @@ class View extends CI_Controller {
 
         $x = 0;
         while(isset($result[$x]['logo'])){
-            $result[$x]['logo'] = 'https://console.chainwon.com/static/img/logo/'.$result[$x]['logo'].'.png';
+            $result[$x]['logo'] = 'https://cdn.chainwon.com/img/logo/'.$result[$x]['logo'].'.png';
             if($result[$x]['cover'] == NULL){
                 $result[$x]['cover'] = 'https://i.loli.net/2018/02/13/5a8302bdbadaa.jpg';
             }

@@ -85,7 +85,6 @@ class View extends CI_Controller {
         for($x=0;$x<count($result);$x++){
             $result[$x]['logo'] = 'https://cdn.chainwon.com/img/logo/'.$result[$x]['logo'].'.png';
         }
-
         $this->Model->end($result);
     }
 

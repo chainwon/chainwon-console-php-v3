@@ -99,6 +99,99 @@ class Controller extends CI_Controller {
         $this->Model->end($a);
     }
 
+    public function newSite(){
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $a = array(
+            'state' => 1,
+            'notice' => '验证成功！',
+        );
+
+        $verify = array(
+            'site' => '网站链接',
+        );
+
+        for ($x=0; $x<count($verify); $x++) {
+            if($post[array_keys($verify)[$x]]==''){
+                $a['state'] = 0;
+                $a['notice'] = $verify[array_keys($verify)[$x]].'不能为空！';
+                $this->Model->end($a);
+            }
+        }
+
+        if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$post['site'])) {
+            $a['state'] = 0;
+            $a['notice'] = '你输入的 URL 不正确！请检查是否带上 http:// 或 https:// ！';
+            $this->Model->end($a);
+        }
+
+        $site = parse_url($post['site'])['host'];
+        $this->db->like('site',$site);
+        $this->db->select('site,site_id,verify');
+        $query = $this->db->get('website');
+        $rows = $query->result_array();
+        foreach($rows as $row){
+            if(parse_url($row['site'])['host'] == $site){
+                if($row['verify']==0){
+                    $a['state'] = 2;
+                    $a['notice'] = '已收录了该网址，将直接验证你的所有权！';
+                    $a['site_id'] = $row['site_id'];
+                    $this->Model->end($a);
+                }else{
+                    $a['state'] = 0;
+                    $a['notice'] = '该网址已绑定其他账号！';
+                }
+            }
+        }
+        
+        $this->Model->end($a);
+    }
+
+    public function verify() {
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $a = array(
+            'state' => 1,
+            'notice' => '验证成功！',
+        );
+
+        if(!$post['site_id']){
+            $this->Model->end($a);
+        }
+
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->select('site_id,name,site');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+        $token = md5($this->Model->user['uid'].$row['site_id'].$row['site'].$row['name'].'chainwon_verify');
+        if(@file_get_contents($row['site'].'/chainwon_verify.html')){
+            $client_token = file_get_contents($row['site'].'/chainwon_verify.html');
+        }else{
+            $a['state'] = 0;
+            $a['notice'] = '验证失败，未检测到您上传配置文件！';
+            $this->Model->end($a);
+        }
+
+        preg_match('/[\w\x{4e00}-\x{9fa5}]+/u',$client_token,$client_token);
+
+        $client_token = preg_replace('#/[\w]/#', '$1', $client_token);
+        $client_token = $client_token[0];
+
+        if($client_token == $token){
+            $data = array(
+                'uid' => $this->Model->user['uid'],
+                'verify' => 1,
+            );
+            $this->db->where('site_id',$post['site_id']);
+            $this->db->update('website', $data);
+            $this->Model->end($a);
+        }else{
+            $a['state'] = 0;
+            $a['notice'] = '验证失败，验证文件不匹配！';
+            $this->Model->end($a);
+        }
+    }
+
     public function addNavigation(){
         $a = array(
             'state' => 1,

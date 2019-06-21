@@ -65,6 +65,30 @@ class View extends CI_Controller {
         $this->Model->end($a);
     }
 
+    public function verifyfile(){   
+        $this->db->where('site_id',$_GET['id']);
+        $this->db->select('site_id,name,site');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="chainwon_verify.html"');
+        header('Content-Transfer-Encoding: binary');
+        echo md5($this->Model->user['uid'].$row['site_id'].$row['site'].$row['name'].'chainwon_verify');
+    }
+
+    public function verifiedSite(){   
+        $this->db->where('uid',$this->Model->user['uid']);
+        $this->db->where('verify',1);
+        $this->db->select('site_id,name,site,logo,intro');
+        $query = $this->db->get('website');
+        $result = $query->result_array();
+        for($x=0;$x<count($result);$x++){
+            $result[$x]['logo'] = 'https://cdn.chainwon.com/img/logo/'.$result[$x]['logo'].'.png';
+        }
+
+        $this->Model->end($result);
+    }
+
     public function settingNavigation() {
        
         $this->db->where('uid',$this->Model->user['uid']);

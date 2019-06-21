@@ -7,4 +7,5 @@ class Main extends CI_Controller {
         header('Content-type: application/json');
         $this->load->model('Model');
     }
+
 }

@@ -304,7 +304,7 @@ class Controller extends CI_Controller {
         );
 
         $data = array(
-            'title' => '网站标题',
+            'name' => '网站标题',
             'site' => '网站链接',
             'intro' => '网站介绍',
             'logo' => '网站图标',
@@ -334,7 +334,7 @@ class Controller extends CI_Controller {
             if(parse_url($row['site'])['host'] == $site){
                 $a['state'] = 2;
                 $a['notice'] = '已收录了该网址，现在他已经自动添加到了你的网址导航中！';
-                $a['id'] = $row['site_id'];
+                $a['site_id'] = $row['site_id'];
                 $this->Model->end($a);
             }
         }
@@ -343,7 +343,7 @@ class Controller extends CI_Controller {
         
         copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
         $data = array(
-            'name' => $post['title'],
+            'name' => $post['name'],
             'intro' => $post['intro'],
             'site' => $post['site'],
             'logo' => md5(parse_url($post['site'])['host']),
@@ -355,7 +355,7 @@ class Controller extends CI_Controller {
         $this->db->select('site_id');
         $query = $this->db->get('website');
         $row = $query->row_array();
-        $a['id'] = $row['site_id'];
+        $a['site_id'] = $row['site_id'];
     
 
         $this->Model->end($a);

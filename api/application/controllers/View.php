@@ -134,8 +134,23 @@ class View extends CI_Controller {
             $this->db->where('tag_id', $post['tag_id']);
             $query = $this->db->get('tag_relationship');
             $result = $query->result_array();
-            foreach($result as $row){
-                $this->db->or_where('site_id',$row['site_id']);
+            if(count($result)>0){
+                $this->db->group_start();
+                foreach($result as $row){
+                    $this->db->or_where('site_id',$row['site_id']);
+                }
+                $this->db->group_end();
+            }
+        }
+
+        if(isset($post['keyword'])){
+            if($post['keyword']!==''){
+                $this->db->group_start();
+                $this->db->or_like('name',$post['keyword']);
+                $this->db->or_like('intro',$post['keyword']);
+                $this->db->or_like('keywords',$post['keyword']);
+                $this->db->or_like('site',$post['keyword']);
+                $this->db->group_end();
             }
         }
 

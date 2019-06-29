@@ -129,7 +129,16 @@ class View extends CI_Controller {
         if(!isset($post['page'])){
             $post['page'] = 1;
         }
-        
+
+        if(isset($post['tag_id'])){
+            $this->db->where('tag_id', $post['tag_id']);
+            $query = $this->db->get('tag_relationship');
+            $result = $query->result_array();
+            foreach($result as $row){
+                $this->db->or_where('site_id',$row['site_id']);
+            }
+        }
+
         $this->db->select('site_id,name,logo,intro,site,order,cover');
         $this->db->limit(32,($post['page']-1)*32);
 
@@ -164,4 +173,14 @@ class View extends CI_Controller {
 
         $this->Model->end($result);
     }
+
+    public function storeTag(){
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $query = $this->db->get('tag');
+        $result = $query->result_array();
+
+        $this->Model->end($result);
+    }
+
 }

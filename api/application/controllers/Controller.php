@@ -351,12 +351,7 @@ class Controller extends CI_Controller {
             'uid' => $this->Model->user['uid'],
         );
         $this->db->insert('website', $data);
-        $this->db->where($data);
-        $this->db->select('site_id');
-        $query = $this->db->get('website');
-        $row = $query->row_array();
-        $a['site_id'] = $row['site_id'];
-    
+        $a['site_id'] = $this->db->insert_id();
 
         $this->Model->end($a);
     }

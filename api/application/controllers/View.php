@@ -155,7 +155,7 @@ class View extends CI_Controller {
         }
 
         $this->db->select('site_id,name,logo,intro,site,order,cover');
-        $this->db->limit(32,($post['page']-1)*32);
+        $this->db->limit(36,($post['page']-1)*36);
 
         if($this->Model->chainwon_user['ban']!=1){
             $this->db->where('isdefault != ', 4);

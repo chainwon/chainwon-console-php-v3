@@ -338,8 +338,6 @@ class Controller extends CI_Controller {
                 $this->Model->end($a);
             }
         }
-    
-
         
         copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
         $data = array(
@@ -352,6 +350,92 @@ class Controller extends CI_Controller {
         );
         $this->db->insert('website', $data);
         $a['site_id'] = $this->db->insert_id();
+
+        $this->Model->end($a);
+    }
+
+    public function editUpdate(){
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $a = array(
+            'state' => 1,
+            'notice' => '站点信息已更新，感谢你的贡献！',
+        );
+
+        $data = array(
+            'name' => '网站标题',
+            'site' => '网站链接',
+            'intro' => '网站介绍',
+            'logo' => '网站图标',
+        );
+
+        for ($x=0; $x<4; $x++) {
+            if($post[array_keys($data)[$x]]==''){
+                $a['state'] = 0;
+                $a['notice'] = $data[array_keys($data)[$x]].'不能为空！';
+                $this->Model->end($a);
+            }
+        }
+
+        if (!preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",$post['site'])) {
+            $a['state'] = 0;
+            $a['notice'] = '你输入的 URL 不正确！请检查是否带上 http 或 https ！';
+            $this->Model->end($a);
+        }
+
+        $this->load->model('Edit');
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->select('logo,name,site,intro,public');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+
+        if($row['public'] == 0){
+            $a['state'] = 0;
+            $a['notice'] = '此项目已禁止公共编辑！';
+            $this->Model->end($a);
+        }
+        
+        $this->Edit->websiteChange($this->Edit->websiteArchive($row,$post['site_id']),$post['site_id']);
+        
+        $time = time();
+        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host'].$time).'.png');
+        $data = array(
+            'name' => $post['name'],
+            'intro' => $post['intro'],
+            'site' => $post['site'],
+            'logo' => md5(parse_url($post['site'])['host'].$time),
+        );
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->update('website', $data);
+
+        $this->Model->end($a);
+    }
+
+    public function editBan(){
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $a = array(
+            'state' => 1,
+        );
+
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->select('logo,name,site,intro,public,uid,verify');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+
+        if($row['uid'] == $this->Model->user['uid'] && $row['verify'] == 1){
+            if($row['public'] == 1){
+                $this->db->set('public', 0);
+                $a['notice'] = '禁止成功！';
+                $a['public'] = 0;
+            }else{
+                $this->db->set('public', 1);
+                $a['notice'] = '允许成功！';
+                $a['public'] = 1;
+            }
+            $this->db->where('site_id', $post['site_id']);
+            $this->db->update('website');
+        }
 
         $this->Model->end($a);
     }

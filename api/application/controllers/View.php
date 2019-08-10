@@ -198,4 +198,25 @@ class View extends CI_Controller {
         $this->Model->end($result);
     }
 
+    public function edit(){
+        $post = json_decode(file_get_contents("php://input"),true);
+
+        $this->db->where('site_id',$post['site_id']);
+        $this->db->select('logo,name,site,intro,public,uid,verify');
+        $query = $this->db->get('website');
+        $row = $query->row_array();
+        $row['logo'] = 'https://cdn.chainwon.com/img/logo/'.$row['logo'].'.png';
+        if($row['uid'] == $this->Model->user['uid'] && $row['verify'] == 1){
+            if($row['public'] == 1){
+                $row['banButton'] = 1;
+            }else{
+                $row['banButton'] = 0;
+            }
+        }
+
+        $this->load->model('Edit');
+        $row['change'] = $this->Edit->editChange($post['site_id']);
+
+        $this->Model->end($row);
+    }
 }

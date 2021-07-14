@@ -278,10 +278,10 @@ class Controller extends CI_Controller {
                         $this->Model->end($a);
                     }else{
                         $name=time().'.png';
-                        move_uploaded_file($_FILES["file"]["tmp_name"],$this->Model->root."upload/".$name);
+                        move_uploaded_file($_FILES["file"]["tmp_name"],$this->Model->root."static/upload/".$name);
                         $a['state'] = 1;
                         $a['notice'] = '上传成功';
-                        $a['url'] = 'https://console.chainwon.com/upload/'.$name;
+                        $a['url'] = 'https://console.chainwon.com/static/upload/'.$name;
                     }
                 }
             }else{
@@ -339,7 +339,7 @@ class Controller extends CI_Controller {
             }
         }
         
-        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
+        copy($this->Model->root.parse_url($post['logo'])["path"],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
         $data = array(
             'name' => $post['name'],
             'intro' => $post['intro'],
@@ -396,11 +396,14 @@ class Controller extends CI_Controller {
                 $this->Model->end($a);
             }
         }
+
+        unset($row['verify']);
+        unset($row['uid']);
         
         $this->Edit->websiteChange($this->Edit->websiteArchive($row,$post['site_id']),$post['site_id']);
         
         $time = time();
-        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host'].$time).'.png');
+        copy($this->Model->root.parse_url($post['logo'])["path"],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host'].$time).'.png');
         $data = array(
             'name' => $post['name'],
             'intro' => $post['intro'],

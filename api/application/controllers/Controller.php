@@ -339,7 +339,7 @@ class Controller extends CI_Controller {
             }
         }
         
-        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
+        copy($this->Model->root.parse_url($post['logo'])["path"],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host']).'.png');
         $data = array(
             'name' => $post['name'],
             'intro' => $post['intro'],
@@ -398,7 +398,7 @@ class Controller extends CI_Controller {
         $this->Edit->websiteChange($this->Edit->websiteArchive($row,$post['site_id']),$post['site_id']);
         
         $time = time();
-        copy($post['logo'],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host'].$time).'.png');
+        copy($this->Model->root.parse_url($post['logo'])["path"],$this->Model->root.'static/img/logo/'.md5(parse_url($post['site'])['host'].$time).'.png');
         $data = array(
             'name' => $post['name'],
             'intro' => $post['intro'],

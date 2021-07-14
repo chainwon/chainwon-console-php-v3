@@ -385,14 +385,16 @@ class Controller extends CI_Controller {
 
         $this->load->model('Edit');
         $this->db->where('site_id',$post['site_id']);
-        $this->db->select('logo,name,site,intro,public');
+        $this->db->select('logo,name,site,intro,public,verify,uid');
         $query = $this->db->get('website');
         $row = $query->row_array();
 
-        if($row['public'] == 0){
-            $a['state'] = 0;
-            $a['notice'] = '此项目已禁止公共编辑！';
-            $this->Model->end($a);
+        if($row['public']==0){
+            if($row['verify']==1 && $row['uid']!=$this->Model->user['uid']){
+                $a['state'] = 0;
+                $a['notice'] = '此项目已禁止公共编辑！';
+                $this->Model->end($a);
+            }
         }
         
         $this->Edit->websiteChange($this->Edit->websiteArchive($row,$post['site_id']),$post['site_id']);

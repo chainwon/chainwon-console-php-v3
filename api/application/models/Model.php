@@ -20,7 +20,7 @@ class Model extends CI_Model {
             $c = $_COOKIE['c'];
         }
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://account.mixcm.com/api/view/user');
+        curl_setopt($ch, CURLOPT_URL, 'https://account.chainwon.com/api/view/user');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);

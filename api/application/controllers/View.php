@@ -1,4 +1,4 @@
-﻿<?php
+﻿﻿<?php
 class View extends CI_Controller {
 
     public function __construct(){
@@ -91,12 +91,12 @@ class View extends CI_Controller {
     public function settingNavigation() {
        
         $this->db->where('uid',$this->Model->user['uid']);
-        $this->db->select('site_id,order');
+        $this->db->select('site_id,re_order');
         $this->db->order_by('site_id ASC');
         $query = $this->db->get('relationship');
         $order = $query->result_array();
         if(isset($order[0])){
-            $this->db->select('site_id,name,logo,intro,site,order,cover');
+            $this->db->select('site_id,name,logo,intro,site,we_order,cover');
             foreach ($order as $site_id){
                 $this->db->or_where('site_id',$site_id['site_id']);
             }
@@ -111,12 +111,12 @@ class View extends CI_Controller {
                     $result[$x]['cover'] = 'https://i.loli.net/2018/02/13/5a8302bdbadaa.jpg';
                 }
 
-                $result[$x]['order'] = $order[$x]['order'];
+                $result[$x]['we_order'] = $order[$x]['re_order'];
                 $result[$x]['added'] = true;
                 $x += 1;
             }
 
-            array_multisort(array_column($result,'order'),SORT_ASC,$result); // 数组排序
+            array_multisort(array_column($result,'we_order'),SORT_ASC,$result); // 数组排序
 
             $this->Model->end($result);
         }
@@ -154,7 +154,7 @@ class View extends CI_Controller {
             }
         }
 
-        $this->db->select('site_id,name,logo,intro,site,order,cover');
+        $this->db->select('site_id,name,logo,intro,site,we_order,cover');
         $this->db->limit(36,($post['page']-1)*36);
 
         if($this->Model->chainwon_user['ban']!=1){
@@ -163,9 +163,9 @@ class View extends CI_Controller {
             $this->db->where('isdefault != ', 2);
         }
         if($this->Model->chainwon_user['newest'] == 1){
-            $this->db->order_by('order DESC, site_id DESC');
+            $this->db->order_by('we_order DESC, site_id DESC');
         }else{
-            $this->db->order_by('order DESC, site_id ASC');
+            $this->db->order_by('we_order DESC, site_id ASC');
         }
         
         $query = $this->db->get('website');
